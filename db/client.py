@@ -1,3 +1,4 @@
+from typing import Type
 from sqlalchemy.orm import Session
 
 from db import Person
@@ -21,26 +22,30 @@ class DBClientPerson:
         self.db_session.refresh(db_person)
         return db_person
 
-    def delete_person(self, person_id: int) -> None:
+    def delete_person(self, person_id: int) -> bool:
         person = self.get_person_by_id(person_id)
-        self.db_session.delete(person)
-        self.db_session.commit()
-        return True
+        if person is None:
+            return False
+        else:
+            self.db_session.delete(person)
+            self.db_session.commit()
+            return True
 
     def update_person(self, person_id: int, firstname, lastname, is_married, spouse_id=None, kids_ids=None) -> Person:
         person = self.get_person_by_id(person_id)
-        person.firstname = firstname if firstname is not None else person.firstname
-        person.lastname = lastname if lastname is not None else person.lastname
-        person.spouse_id = spouse_id if spouse_id is not None else person.spouse_id
-        person.kids_id = kids_ids if kids_ids is not None else person.kids_id
-        person.is_married = is_married if is_married is not None else person.is_married
-        self.db_session.commit()
-        self.db_session.refresh(person)
-        return person
+        if person:
+            person.firstname = firstname if firstname is not None else person.firstname
+            person.lastname = lastname if lastname is not None else person.lastname
+            person.spouse_id = spouse_id if spouse_id is not None else person.spouse_id
+            person.kids_id = kids_ids if kids_ids is not None else person.kids_id
+            person.is_married = is_married if is_married is not None else person.is_married
+            self.db_session.commit()
+            self.db_session.refresh(person)
+            return person
 
-    def get_persons(self) -> list[Person]:
+    def get_persons(self) -> list[Type[Person]]:
         persons = self.db_session.query(Person).all()
         return persons
 
-    def get_person_by_kids_ids(self, kids_ids: list) -> Person:
-        return self.db_session.query(Person).filter(Person.kids_ids == kids_ids).one_or_none()
+    def get_person_by_kid_id(self, kid_id: int) -> Person:
+        return self.db_session.query(Person).filter(Person.kids_ids == kid_id).one_or_none()
