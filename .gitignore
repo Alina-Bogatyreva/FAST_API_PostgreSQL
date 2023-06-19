@@ -8,3 +8,5 @@ allure-results/
 
 # databases with extension sqlite3
 *.sqlite3
+
+.env
